@@ -311,7 +311,7 @@ ansible-playbook uninstall-apache-pb.yml
 # Check the browser with the corresponding IPv4 DNS name and ensure webpage is removed.
 
 ###########################################################################################
-Lab 4: Exploring more on Ansible Playbooks
+Lab 4: 
 ###########################################################################################
 
 
