@@ -906,3 +906,133 @@ $ ansible-playbook implement_roles.yml
 
 # Check the home page on browser. (Public DNS)
 # It will show the webpage with msg "We are performing the Roles Lab"
+
+==========================================================================
+
+Handling errors in Ansible playbooks 
+=======================================
+
+1. Use ignore_errors Attribute:
+The ignore_errors attribute can be set on a task to continue with the playbook execution even if the task fails.
+
+
+---
+- name: Example with ignore_errors
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Task that may fail
+      command: /path/to/failing/command
+      ignore_errors: yes
+
+    - name: Continue with other tasks
+      debug:
+        msg: "This task will be executed even if the previous one fails."
+
+
+2. Use failed_when Attribute:
+The failed_when attribute allows you to specify conditions under which a task is considered failed. This is helpful for customizing error conditions.
+
+---
+- name: Example with failed_when
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Task with custom failure condition
+      command: /path/to/command
+      register: result
+      failed_when: "'Error' in result.stderr"
+
+    - name: Continue with other tasks
+      debug:
+        msg: "This task will be executed if the previous one fails according to the condition."
+
+3. Use block for Error Handling:
+The block structure allows you to group tasks together and apply error handling to the entire block.
+
+---
+- name: Example with block
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - block:
+        - name: Task 1
+          command: /path/to/first/command
+
+        - name: Task 2
+          command: /path/to/second/command
+      rescue:
+        - name: Rescue Task
+          debug:
+            msg: "This task will be executed if any task in the block fails."
+
+
+4. Use ignore_unreachable and ignore_errors in Plays:
+At the play level, you can use ignore_unreachable and ignore_errors to handle unreachable hosts and errors in the entire play.
+
+---
+- name: Example Play with ignore_unreachable and ignore_errors
+  hosts: all
+  ignore_unreachable: yes
+  ignore_errors: yes
+  gather_facts: false
+  tasks:
+    - name: Task that may fail or be unreachable
+      command: /path/to/failing/or/unreachable/command
+
+
+5. Use any_errors_fatal at Play Level:
+The any_errors_fatal attribute at the play level makes the entire play fail if any task fails.
+
+---
+- name: Example Play with any_errors_fatal
+  hosts: all
+  any_errors_fatal: yes
+  gather_facts: false
+  tasks:
+    - name: Task 1
+      command: /path/to/first/command
+
+    - name: Task 2
+      command: /path/to/second/command
+
+Choose the approach that best fits your use case, and consider combining multiple methods for comprehensive error handling in your Ansible playbooks.
+
+
+============================================================================
+Nested playbooks in Ansible allow you to include and run one playbook from another. This can be useful for organizing and reusing common sets of tasks. Below is an example playbook that includes a nested playbook:
+
+vi main_playbook.yml:
+
+---
+- name: Main Playbook
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Include Nested Playbook
+      include_playbook: nested_playbook.yml
+
+
+vi nested_playbook.yml:
+---
+- name: Nested Playbook
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Task 1
+      debug:
+        msg: "This is Task 1 from the nested playbook."
+
+    - name: Task 2
+      debug:
+        msg: "This is Task 2 from the nested playbook."
+
+Running the Playbooks:
+ansible-playbook main_playbook.yml
+
+
+
+Using nested playbooks allows you to modularize your Ansible code and promote reusability. You can have multiple playbooks that focus on specific tasks or roles, and then include them in a main playbook as needed. This makes it easier to maintain and organize your automation code.
+
